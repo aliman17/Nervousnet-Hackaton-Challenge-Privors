@@ -1,5 +1,6 @@
 package nervousnethack;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.logging.Level;
@@ -28,8 +29,10 @@ public abstract class Analyzer {
         try {
             HashMap<Integer, LinkedHashMap<Integer, LinkedHashMap<Integer, Double>>> rawMap = loader.exportRawValues();
             HashMap<Integer, LinkedHashMap<Integer, LinkedHashMap<Integer, Double>>> outputMap = Dumper.initOutputMap();
-            double sumGE = 0;
-            double sumLE = 0;
+            ArrayList<Double> ge = new ArrayList<>();
+            ArrayList<Double> le = new ArrayList<>();
+            ArrayList<Double> div = new ArrayList<>();
+            ArrayList<Double> ent = new ArrayList<>();
             int num = 20;
             
             LocalAnalyser analyzer = new LocalAnalyser();
@@ -38,11 +41,22 @@ public abstract class Analyzer {
                 analyze(rawMap, outputMap);
                 LocalAnalyser.Ranking r = analyzer.analyse(rawMap, outputMap);
                 //double ge = calcGlobalError(rawMap, outputMap);
-                sumGE += r.globalError;
-                sumLE += r.localError;
-                System.out.println(i + " " + r.localError + "/" + r.globalError);
+                ge.add(r.globalError);
+                le.add(r.localError);
+                div.add(r.diversity);
+                ent.add(r.entropy);
+                System.out.println(i + " " + r.entropy + "/" + r.diversity + "/" + r.localError + "/" + r.globalError);
             }
-            System.out.println("Avg: " + sumLE/num + "/" + sumGE/num);
+            double avgGe = ge.stream().reduce(0.0, (a,b) -> a+b) / num;
+            double avgLe = le.stream().reduce(0.0, (a,b) -> a+b) / num;
+            double avgDiv = div.stream().reduce(0.0, (a,b) -> a+b) / num;
+            double avgEnt = ent.stream().reduce(0.0, (a,b) -> a+b) / num;
+            double stdGe = Math.sqrt(ge.stream().reduce(0.0, (a,b) -> a+(b-avgGe)*(b-avgGe)) / (num-1));
+            double stdLe = Math.sqrt(le.stream().reduce(0.0, (a,b) -> a+(b-avgLe)*(b-avgLe)) / (num-1));
+            double stdDiv = Math.sqrt(div.stream().reduce(0.0, (a,b) -> a+(b-avgDiv)*(b-avgDiv)) / (num-1));
+            double stdEnt = Math.sqrt(ent.stream().reduce(0.0, (a,b) -> a+(b-avgEnt)*(b-avgEnt)) / (num-1));
+            System.out.println("Avg: " + avgEnt + "/" + avgDiv + "/" + avgLe + "/" + avgGe);
+            System.out.println("Std: " + stdEnt + "/" + stdDiv + "/" + stdLe + "/" + stdGe);
         } catch (Exception ex) {
             Logger.getLogger(Analyzer.class.getName()).log(Level.SEVERE, null, ex);
         }

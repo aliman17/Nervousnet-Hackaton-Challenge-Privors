@@ -19,6 +19,7 @@ public class LowerResolutionHalf extends Analyzer {
     
     double targetStd = 0.05;
     double threshold = 0.4;
+    int numBins = 6;
 
     @Override
     public void analyze(HashMap<Integer, LinkedHashMap<Integer, LinkedHashMap<Integer, Double>>> in, HashMap<Integer, LinkedHashMap<Integer, LinkedHashMap<Integer, Double>>> out) throws Exception {
@@ -31,7 +32,7 @@ public class LowerResolutionHalf extends Analyzer {
             
             double bias = r.nextGaussian()*std;
             double bias2 = r.nextGaussian()*std;
-            boolean leftZero = r.nextBoolean();
+            int nonZeroIdx = r.nextInt(numBins);
             
             for (int day : days.keySet()) {
                 LinkedHashMap<Integer, Double> vals = days.get(day);
@@ -39,24 +40,17 @@ public class LowerResolutionHalf extends Analyzer {
                 List<Double> arr = new ArrayList<>(vals.values());
                 int start;
                 int end;
-                if(leftZero) {
-                    start = arr.size()/2;
-                    end = arr.size();
-                    for(int i = 0; i < start; i++) {
-                        out.get(user).get(day).put(i+1, bias2);
-                    }
-                    for(int i = start; i < end; i++) {
-                        arr.set(i, 2*arr.get(i));
-                    }
-                } else {
-                    start = 0;
-                    end = arr.size()/2;
-                    for(int i = start; i < end; i++) {
-                        arr.set(i, 2*arr.get(i));
-                    }
-                    for(int i = end; i < arr.size(); i++) {
-                        out.get(user).get(day).put(i+1, bias2);
-                    }
+                
+                start = (arr.size()/numBins)*nonZeroIdx;
+                end = (arr.size()/numBins)*(nonZeroIdx+1);
+                for(int i = 0; i < start; i++) {
+                    out.get(user).get(day).put(i+1, bias2);
+                }
+                for(int i = start; i < end; i++) {
+                    arr.set(i, numBins*arr.get(i));
+                }
+                for(int i = end; i < arr.size(); i++) {
+                    out.get(user).get(day).put(i+1, bias2);
                 }
                 
                 arr = arr.subList(start, end);
