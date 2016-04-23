@@ -17,9 +17,9 @@ import java.util.Random;
  */
 public class LowerResolutionHalf extends Analyzer {
     
-    double targetStd = 0.05;
-    double threshold = 0.4;
-    int numBins = 6;
+    double targetStd = 0.07;
+    double threshold = 0.5;
+    int numBins = 1;
 
     @Override
     public void analyze(HashMap<Integer, LinkedHashMap<Integer, LinkedHashMap<Integer, Double>>> in, HashMap<Integer, LinkedHashMap<Integer, LinkedHashMap<Integer, Double>>> out) throws Exception {
