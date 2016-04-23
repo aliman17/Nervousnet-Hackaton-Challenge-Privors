@@ -17,9 +17,9 @@ import java.util.Random;
  */
 public class LRBinnedLocalBias extends Analyzer {
     
-    double targetStd = 0.062;
+    double targetStd = 0.07;
     double threshold = 0.56;
-    int numBins = 1;
+    int numBins = 1; // not used in final submission
 
     @Override
     public void analyze(HashMap<Integer, LinkedHashMap<Integer, LinkedHashMap<Integer, Double>>> in, HashMap<Integer, LinkedHashMap<Integer, LinkedHashMap<Integer, Double>>> out) throws Exception {
@@ -41,6 +41,7 @@ public class LRBinnedLocalBias extends Analyzer {
                 int start;
                 int end;
                 
+                // divide data (not used in final submission)
                 start = (arr.size()/numBins)*nonZeroIdx;
                 end = (arr.size()/numBins)*(nonZeroIdx+1);
                 double zeroBias = r.nextGaussian()*halfedStd;
@@ -57,6 +58,7 @@ public class LRBinnedLocalBias extends Analyzer {
                 
                 arr = arr.subList(start, end);
                 
+                // segment the signal + add local bias
                 double sum = 0;
                 int num = 0;
                 for(int i = 0; i < arr.size(); i++) {
@@ -82,6 +84,7 @@ public class LRBinnedLocalBias extends Analyzer {
                     }
                 }
                 
+                // add global bias
                 for(int i = 0; i < arr.size(); i++) {
                     out.get(user).get(day).put(i+start+1, arr.get(i) + bias);
                 }
